@@ -191,7 +191,47 @@ Fodler: ${folder}
 **********************************************************`
     fs.appendFileSync('./logs.txt', logMessage);
   }
+
+  startRelocation() {
+    fs.readdir('./files/', (err, files) => {
+      if (err) {
+        return this.logger('START RELOCATION ERROR', err)
+      }
+      files.forEach(file => this.relocate(`./files/${file}`))
+    })
+  }
+
+  relocate(folderPath) {
+    fs.readdir(folderPath, (err, files) => {
+      if (err) {
+        return this.logger('RELOCATE READ ERROR', err)
+      }
+      files.forEach(file => {
+        if (fs.lstatSync(`${folderPath}/${file}`).isDirectory()) {
+          this.relocate(`${folderPath}/${file}`)
+        } else {
+          const fileNameLower = file.toLowerCase();
+          if (fileNameLower.indexOf('project') < 0 &&
+            fileNameLower.indexOf('manager') < 0 &&
+            fileNameLower.indexOf('менеджер') < 0 &&
+            fileNameLower.indexOf('проект') < 0) {
+            this.moving(folderPath, file)
+          }
+        }
+
+      });
+    })
+  }
+
+  moving(destPath, fileName) {
+    fs.copyFile(`${destPath}/${fileName}`, path.resolve(destPath, '..', fileName), (err) => {
+      if (err) {
+        this.logger('MOVING FILE ERROR', err, `${destPath}/${fileName}`)
+      }
+    })
+  }
 }
 
 const parser = new Parser();
 parser.run();
+// parser.startRelocation();
