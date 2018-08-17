@@ -1,0 +1,4 @@
+logs.txt
+files/*
+!files/.gitkeep
+node_modules
